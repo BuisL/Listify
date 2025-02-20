@@ -8,12 +8,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.listify.ui.screens.AddArtist.AddArtistDestination
-import com.example.listify.ui.screens.AddArtist.AddArtistScreen
-import com.example.listify.ui.screens.ArtistDiscography.ArtistDiscographyDestination
-import com.example.listify.ui.screens.ArtistDiscography.ArtistDiscographyScreen
-import com.example.listify.ui.screens.Discographies.DiscographiesDestination
-import com.example.listify.ui.screens.Discographies.DiscographiesScreen
+import com.example.listify.ui.screens.addArtist.AddArtistDestination
+import com.example.listify.ui.screens.addArtist.AddArtistScreen
+import com.example.listify.ui.screens.artistDiscography.ArtistDiscographyDestination
+import com.example.listify.ui.screens.artistDiscography.ArtistDiscographyScreen
+import com.example.listify.ui.screens.discographies.DiscographiesDestination
+import com.example.listify.ui.screens.discographies.DiscographiesScreen
 import com.example.listify.ui.screens.HomeDestination
 import com.example.listify.ui.screens.HomeScreen
 
@@ -54,7 +54,7 @@ fun ListifyNavHost(
         ) { navBackStackEntry ->
             val artistId = navBackStackEntry.arguments?.getString(ArtistDiscographyDestination.itemIdArg)
             if (artistId != null) {
-                ArtistDiscographyScreen(artistId = artistId, modifier = Modifier.fillMaxSize())
+                ArtistDiscographyScreen(modifier = Modifier.fillMaxSize())
             }
         }
 

@@ -1,10 +1,10 @@
 package com.example.listify
 
 import android.app.Application
-import com.example.listify.data.AppContainer
-import com.example.listify.data.DefaultAppContainer
-import com.example.listify.data.database.DatabaseContainer
-import com.example.listify.data.database.DefaultDatabaseContainer
+import com.example.listify.di.AppContainer
+import com.example.listify.di.DefaultAppContainer
+import com.example.listify.data.local.DatabaseContainer
+import com.example.listify.data.local.DefaultDatabaseContainer
 
 class ListifyApplication : Application() {
 
