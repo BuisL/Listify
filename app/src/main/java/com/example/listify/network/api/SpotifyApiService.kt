@@ -1,7 +1,7 @@
 package com.example.listify.network.api
 
 import com.example.listify.network.model.AccessTokenDto
-import com.example.listify.network.model.ArtistAlbumsResponse
+import com.example.listify.network.model.ArtistAlbumsDto
 import com.example.listify.network.model.SearchArtistDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -26,10 +26,10 @@ interface SpotifyApiService {
     suspend fun getArtistAlbums(
         @Header("Authorization") authorization: String, // Bearer token
         @Path("id") artistId: String,
-        @Query("limit") limit: Int? = null, // Optional query parameter for pagination
-        @Query("offset") offset: Int? = null, // Optional query parameter for pagination
+        @Query("limit") limit: Int? = 10, // Optional query parameter for pagination
+        @Query("offset") offset: Int? = 0, // Optional query parameter for pagination
         @Query("include_groups") includeGroups: String? = null,
-    ): ArtistAlbumsResponse
+    ): ArtistAlbumsDto
 
     @GET("/v1/search")
     suspend fun getSearchArtist(
@@ -44,6 +44,6 @@ interface SpotifyApiService {
     suspend fun getNextPage(
         @Header("Authorization") authorization: String,
         @Url url: String // Use @Url to request the next page dynamically
-    ): ArtistAlbumsResponse
+    ): ArtistAlbumsDto
 
 }

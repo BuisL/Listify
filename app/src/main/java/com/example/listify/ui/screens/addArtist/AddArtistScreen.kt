@@ -7,23 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
@@ -35,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,9 +40,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.listify.ListifyTopBar
 import com.example.listify.R
+import com.example.listify.di.ViewModelFactories
 import com.example.listify.navigation.NavigationDestination
-import com.example.listify.ui.screens.artistDiscography.AlbumCard
-import kotlinx.coroutines.launch
+import com.example.listify.ui.components.grids.AlbumGrid
+import com.example.listify.ui.components.nav.BottomNavBar
 
 
 object AddArtistDestination : NavigationDestination {
@@ -63,32 +55,34 @@ object AddArtistDestination : NavigationDestination {
 @Composable
 fun AddArtistScreen(
     onCancelNavigation: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AddArtistViewModel = viewModel(factory = ViewModelFactories.AddArtistFactory)
 ) {
-
-    val artistAddViewModel: AddArtistViewModel = viewModel(factory = AddArtistViewModel.Factory)
-    val searchResults by artistAddViewModel.searchResults.collectAsState()
+    val addArtistUiState by viewModel.uiState.collectAsState()
 
     var expanded by rememberSaveable { mutableStateOf(false) }
     val textFieldState = rememberTextFieldState()
 
     LaunchedEffect(textFieldState.text) {
-        artistAddViewModel.onSearchQueryChanged(textFieldState.text.toString())
+        viewModel.onSearchQueryChanged(textFieldState.text.toString())
     }
 
     Scaffold(
-        bottomBar = { BottomNavBar(
-            viewModel = artistAddViewModel,
-            onCancelNavigation,
-        ) },
-        topBar = { ListifyTopBar(text = "Add Artist") }
+        modifier = modifier,
+        topBar = { ListifyTopBar(text = "Add Artist") },
+        bottomBar = {
+            BottomNavBar(
+                viewModel = viewModel,
+                uiState = addArtistUiState,
+                onCancelNavigation
+            )
+        }
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
 
             SearchBar(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally) // Center the SearchBar
-                    .padding(top = 8.dp),
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
                 inputField = {
                     SearchBarDefaults.InputField(
                         state = textFieldState,
@@ -99,84 +93,52 @@ fun AddArtistScreen(
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     )
                 },
-                expanded = expanded,
-                onExpandedChange = { expanded = it },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Center the SearchBar
+                    .padding(top = 8.dp)
             ) {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    searchResults.forEach { idx ->
+                    addArtistUiState.searchResults.forEach { artist ->
                         ListItem(
-                            headlineContent = { Text(idx.artistName) },
-                            //supportingContent = { Text("Additional info") },
+                            headlineContent = { Text(artist.artistName) },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                .clickable {
+                                    textFieldState.setTextAndPlaceCursorAtEnd(artist.artistName)
+                                    viewModel.getAlbums(artist.id)
+                                    expanded = false
+                                },
                             leadingContent = {
-                                if (idx.imageUrl.isEmpty()){
+                                if (artist.imageUrl.isEmpty()){
                                     Icon(Icons.Filled.Person, contentDescription = null)
                                 } else {
-                                    Box(modifier = Modifier.size(width = 100.dp, height = 100.dp)) {
+                                    Box(
+                                        modifier = Modifier.size(width = 100.dp, height = 100.dp)
+                                    ) {
                                         AsyncImage(
                                             model = ImageRequest.Builder(context = LocalContext.current)
-                                                .data(idx.imageUrl)
+                                                .data(artist.imageUrl)
                                                 .crossfade(true)
                                                 .build(),
                                             contentDescription = null,
                                             contentScale = ContentScale.Crop
                                         )
                                     }
-                                } },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier
-                                .clickable {
-                                    textFieldState.setTextAndPlaceCursorAtEnd(idx.artistName)
-                                    artistAddViewModel.getAlbums(idx.id)
-                                    expanded = false
                                 }
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                            }
                         )
                     }
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+            AlbumGrid(
+                columns = 3,
                 modifier = Modifier.padding(8.dp),
-            ) {
-                itemsIndexed(items = artistAddViewModel.uiState) {index, it ->
-                    AlbumCard(
-                        album = it.album,
-                        selected = it.selected,
-                        onClick = { artistAddViewModel.changeSelect(index) },
-                        modifier = modifier.padding(4.dp),
-                    )
-                }
-            }
+                allAlbums = addArtistUiState.allAlbums,
+                selectedAlbums = addArtistUiState.selectedAlbums,
+                onClick = { it: String -> viewModel.changeSelect(it) }
+            )
         }
     }
 }
-
-@Composable
-fun BottomNavBar(
-    viewModel: AddArtistViewModel,
-    onCancelNavigation: () -> Unit
-) {
-    val coroutineScope = rememberCoroutineScope()
-
-    BottomAppBar(
-        actions = {
-            IconButton(onClick = onCancelNavigation, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Rounded.Cancel, contentDescription = "Home")
-            }
-            IconButton(onClick = { viewModel.selectAll() }, modifier = Modifier.weight(1f), enabled = viewModel.uiState.isNotEmpty()) {
-                Icon(Icons.Filled.Checklist, contentDescription = "Search")
-            }
-            IconButton(onClick = {
-                coroutineScope.launch { viewModel.saveSelectedAlbums()}
-                onCancelNavigation()
-                                 },
-                modifier = Modifier.weight(1f),
-                enabled = (viewModel.uiState.filter { it.selected }).isNotEmpty()) {
-                Icon(Icons.Filled.Check, contentDescription = "Profile")
-            }
-        }
-    )
-}
-

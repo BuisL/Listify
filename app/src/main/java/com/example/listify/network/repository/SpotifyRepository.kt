@@ -8,49 +8,40 @@ import com.example.listify.network.model.AlbumDto
 import com.example.listify.ui.model.AlbumUi
 import com.example.listify.ui.model.ArtistUi
 
-interface SpotifyRepository {
-    suspend fun getAccessToken(): String
-    suspend fun getArtistDiscography(artistId: String): List<AlbumUi>
-    suspend fun searchArtist( artistName: String): List<ArtistUi>
-}
 
-class NetworkSpotifyRepository(private val tokenApiService: SpotifyApiService, private val spotifyApiService: SpotifyApiService) :
-    SpotifyRepository {
+class NetworkSpotifyRepository(
+    private val tokenApiService: SpotifyApiService,
+    private val spotifyApiService: SpotifyApiService
+) {
 
     private val credentials = "da2899ca0ad54491822a6847aa112552:77d7265cfd8d40719f4089cf8de1b760"
     private val encodedCredentials: String = Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP)
 
     private var accessTokenData = AccessTokenData(null, 0, 0)
 
-
-    override suspend fun getArtistDiscography(artistId: String): List<AlbumUi> {
+    suspend fun getArtistDiscography(artistId: String): List<AlbumUi> {
 
         val allAlbums = mutableListOf<AlbumDto>()
         var nextUrl: String? = null
 
-        var token: String
-
         do {
-            token = getAccessToken()
+             refreshAccessToken()
 
             val response = if (nextUrl == null) {
                 // First request
                 spotifyApiService.getArtistAlbums(
-                    authorization = "Bearer $token",
+                    authorization = "Bearer ${accessTokenData.accessToken}",
                     artistId = artistId,
-                    limit = 10,  // Adjust limit as needed
-                    offset = 0,
                     includeGroups = "album"
                 )
             } else {
                 // Next pages use direct URL
                 spotifyApiService.getNextPage(
-                    authorization = "Bearer $token",
+                    authorization = "Bearer ${accessTokenData.accessToken}",
                     url = nextUrl
                 )
             }
 
-            // Add albums from this response
             allAlbums.addAll(response.items)
             nextUrl = response.next // Update next page URL
 
@@ -59,19 +50,17 @@ class NetworkSpotifyRepository(private val tokenApiService: SpotifyApiService, p
         return allAlbums.map { it.toAlbumUi() }
     }
 
-    override suspend fun searchArtist(artistName: String): List<ArtistUi> {
-        val token = getAccessToken()
-        val response = spotifyApiService.getSearchArtist("Bearer $token", artistName)
+    suspend fun searchArtist(artistName: String): List<ArtistUi> {
+        refreshAccessToken()
+        val response = spotifyApiService.getSearchArtist("Bearer ${accessTokenData.accessToken}", artistName)
         return response.artists.items.map { it.toArtistUi() }
     }
 
-    override suspend fun getAccessToken(): String {
-
+    private suspend fun refreshAccessToken() {
         if (!checkAccessTokenValid()) {
             val accessTokenResponse = tokenApiService.getAccessToken(authorization = "Basic $encodedCredentials")
             accessTokenData = AccessTokenData(accessTokenResponse.accessToken, System.currentTimeMillis(), accessTokenResponse.expiresIn * 1000)
         }
-        return accessTokenData.accessToken!!
     }
 
     private fun checkAccessTokenValid(): Boolean {
