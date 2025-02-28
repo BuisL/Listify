@@ -9,6 +9,7 @@ import com.example.listify.ListifyApplication
 import com.example.listify.ui.screens.addArtist.AddArtistViewModel
 import com.example.listify.ui.screens.artistDiscography.ArtistDiscographyViewModel
 import com.example.listify.ui.screens.discographies.DiscographiesViewModel
+import com.example.listify.ui.screens.editAlbum.EditAlbumViewModel
 
 object ViewModelFactories {
 
@@ -42,11 +43,28 @@ object ViewModelFactories {
             val albumsRepository = application.containerDB.albumsRepository
             val artistRepository = application.containerDB.artistRepository
             val artistAlbumCrossRefRepository = application.containerDB.artistAlbumsCrossRefRepository
+            val artistGenreCrossRefRepository = application.containerDB.artistGenreCrossRefRepository
             AddArtistViewModel(
                 spotifyRepository = spotifyRepository,
                 albumsRepository = albumsRepository,
                 artistsRepository = artistRepository,
-                artistAlbumCrossRefRepository = artistAlbumCrossRefRepository)
+                artistAlbumCrossRefRepository = artistAlbumCrossRefRepository,
+                artistGenreCrossRefRepository = artistGenreCrossRefRepository,
+            )
+
+        }
+    }
+
+    val EditAlbumFactory: ViewModelProvider.Factory = viewModelFactory {
+        initializer {
+            val application = (this[APPLICATION_KEY] as ListifyApplication)
+            val albumsRepository = application.containerDB.albumsRepository
+            val artistRepository = application.containerDB.artistRepository
+            EditAlbumViewModel(
+                savedStateHandle = this.createSavedStateHandle(),
+                albumsRepository = albumsRepository,
+                artistRepository = artistRepository
+            )
         }
     }
 }

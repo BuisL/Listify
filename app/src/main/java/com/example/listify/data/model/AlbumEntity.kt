@@ -16,4 +16,13 @@ data class AlbumEntity(
     @ColumnInfo(name = "has_listened") val hasListened: Boolean,
     @ColumnInfo(name = "last_update") val lastUpdate: Long,
     @ColumnInfo(name = "is_listen_later") val isListenLater: Boolean,
-)
+    @ColumnInfo(name = "is_favorite") val isFavorite: Boolean,
+    @ColumnInfo(name = "rating") val rating: Int,
+    @ColumnInfo(name = "note") val note: String,
+) {
+    init {
+        require(rating in 0..10) {
+            "completionPercentage must be between 0 and 10"
+        }
+    }
+}

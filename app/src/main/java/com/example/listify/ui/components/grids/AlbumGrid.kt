@@ -22,12 +22,12 @@ fun AlbumGrid(
         columns = GridCells.Fixed(columns),
         modifier = modifier,
     ) {
-        items(items = allAlbums) {
+        items(items = allAlbums) { album ->
             AlbumCard(
-                album = it,
-                selected = selectedAlbums.find {album -> album.id == it.id} != null,
-                onClick = { onClick(it.id) },
-                modifier = Modifier.padding(4.dp),
+                album = album,
+                selected = selectedAlbums.find {selectedAlbum -> selectedAlbum.id == album.id} != null,
+                onClick = { onClick(album.id) },
+                modifier = Modifier.padding(4.dp)
             )
         }
     }

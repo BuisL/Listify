@@ -9,7 +9,10 @@ fun ArtistUi.toArtistEntity(): ArtistEntity = ArtistEntity(
     id = id,
     artistName = artistName,
     imageUrl = imageUrl,
-    completionPercent = 0f
+    completionPercent = 0f,
+    isFavorite = isFavorite,
+    rating = rating,
+    note = note
 )
 
 fun AlbumUi.toAlbumEntity(): AlbumEntity = AlbumEntity(
@@ -21,6 +24,9 @@ fun AlbumUi.toAlbumEntity(): AlbumEntity = AlbumEntity(
     spotifyUrl = spotifyUrl,
     hasListened = hasListened,
     lastUpdate = lastUpdate,
-    isListenLater = isListenLater
+    isListenLater = isListenLater,
+    isFavorite = isFavorite,
+    note = note,
+    rating = rating
 )
 

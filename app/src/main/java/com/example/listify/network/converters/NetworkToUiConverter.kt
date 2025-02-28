@@ -14,7 +14,10 @@ fun AlbumDto.toAlbumUi(): AlbumUi = AlbumUi(
     spotifyUrl = external_urls!!.spotify,
     hasListened = hasListened,
     lastUpdate = System.currentTimeMillis(),
-    isListenLater = isListenLater
+    isListenLater = isListenLater,
+    rating = 0,
+    note = "",
+    isFavorite = false
 )
 
 fun ArtistDto.toArtistUi(): ArtistUi {
@@ -26,5 +29,8 @@ fun ArtistDto.toArtistUi(): ArtistUi {
         artistName = name,
         imageUrl = imageUrlTemp,
         completionPercent = 0f,
+        rating = 0,
+        note = "",
+        isFavorite = false
     )
 }

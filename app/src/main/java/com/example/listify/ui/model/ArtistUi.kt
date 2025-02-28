@@ -4,5 +4,8 @@ data class ArtistUi(
     val id: String,
     val artistName: String,
     val imageUrl: String,
-    val completionPercent: Float
+    val completionPercent: Float,
+    val rating: Int,
+    val note: String,
+    val isFavorite: Boolean
 )
