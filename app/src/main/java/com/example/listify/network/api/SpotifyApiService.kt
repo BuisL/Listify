@@ -2,6 +2,7 @@ package com.example.listify.network.api
 
 import com.example.listify.network.model.AccessTokenDto
 import com.example.listify.network.model.ArtistAlbumsDto
+import com.example.listify.network.model.ArtistListDto
 import com.example.listify.network.model.SearchArtistDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -30,6 +31,12 @@ interface SpotifyApiService {
         @Query("offset") offset: Int? = 0, // Optional query parameter for pagination
         @Query("include_groups") includeGroups: String? = null,
     ): ArtistAlbumsDto
+
+    @GET("v1/artists")
+    suspend fun getArtistsInfo(
+        @Query("ids") artistIds: String, // Comma-separated list of artist IDs
+        @Header("Authorization") authHeader: String
+    ): ArtistListDto
 
     @GET("/v1/search")
     suspend fun getSearchArtist(

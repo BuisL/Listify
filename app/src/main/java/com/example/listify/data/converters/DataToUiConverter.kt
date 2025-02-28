@@ -14,12 +14,18 @@ fun AlbumEntity.toAlbumUi(): AlbumUi = AlbumUi(
     spotifyUrl = spotifyUrl,
     hasListened = hasListened,
     lastUpdate = lastUpdate,
-    isListenLater = isListenLater
+    isListenLater = isListenLater,
+    rating = rating,
+    isFavorite = isFavorite,
+    note = note
 )
 
 fun ArtistEntity.toArtistUi(): ArtistUi = ArtistUi(
     id = id,
     artistName = artistName,
     imageUrl = imageUrl,
-    completionPercent = completionPercent
+    completionPercent = completionPercent,
+    note = note,
+    rating = rating,
+    isFavorite = isFavorite
 )

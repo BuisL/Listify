@@ -8,19 +8,17 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.example.listify.ui.model.AddArtistUiState
 import com.example.listify.ui.screens.addArtist.AddArtistViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun BottomNavBar(
     viewModel: AddArtistViewModel,
     uiState: AddArtistUiState,
-    onCancelNavigation: () -> Unit
+    onCancelNavigation: () -> Unit,
+    changeLoading: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
 
     BottomAppBar(
         actions = {
@@ -37,8 +35,8 @@ fun BottomNavBar(
                 Icon(Icons.Filled.Checklist, contentDescription = "Search")
             }
             IconButton(onClick = {
-                coroutineScope.launch { viewModel.saveSelectedAlbums()}
-                onCancelNavigation()
+                changeLoading()
+                viewModel.saveSelectedAlbums(onCancelNavigation)
             },
                 modifier = Modifier.weight(1f),
                 enabled = uiState.selectedAlbums.isNotEmpty()

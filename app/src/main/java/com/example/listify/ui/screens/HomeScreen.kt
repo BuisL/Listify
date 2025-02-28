@@ -35,16 +35,42 @@ fun HomeScreen(
         topBar = { ListifyTopBar(text = "Listify") }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding).fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
                 onClick = navigateToDiscographies,
-                modifier = Modifier.padding(8.dp).fillMaxWidth()
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(R.string.discographies)
+                )
+            }
+
+            Button(
+                onClick = {  },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Albums"
+                )
+            }
+
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Games"
                 )
             }
         }

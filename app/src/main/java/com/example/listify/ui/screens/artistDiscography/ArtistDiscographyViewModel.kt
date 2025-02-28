@@ -27,20 +27,53 @@ class ArtistDiscographyViewModel(
     private val _uiState = MutableStateFlow(ArtistDiscographyUiState())
     val uiState: StateFlow<ArtistDiscographyUiState> = _uiState.asStateFlow()
 
-    fun changeSelect(albumId: String) {
-        if(uiState.value.selectedAlbums.find { album -> album.id == albumId } == null) {
-            val latestSelection = uiState.value.allAlbums.find { it.id == albumId }
-
-            latestSelection?.let { _uiState.update { it.copy(selectedAlbums = it.selectedAlbums + latestSelection) } }
-        } else {
-            _uiState.update { it.copy(selectedAlbums = it.selectedAlbums.filter { album -> album.id != albumId }) }
-        }
+    fun selectAlbum(albumId: String) {
+        _uiState.update { it.copy(selectedAlbum = it.allAlbums.find{album -> album.id == albumId}) }
+        _uiState.update { it.copy(selectedAlbum = it.allAlbums.find{album -> album.id == albumId}) }
     }
 
     fun saveSelection() {
         viewModelScope.launch {
-            uiState.value.selectedAlbums.forEach{
-                albumsRepository.updateAlbum(it.toAlbumEntity())
+            uiState.value.selectedAlbum?.let { album ->
+                albumsRepository.updateAlbum(album.toAlbumEntity().copy(lastUpdate = System.currentTimeMillis()))
+            }
+        }
+    }
+
+    fun changeListened() {
+        _uiState.value.selectedAlbum?.let { album ->
+            _uiState.update { it.copy(selectedAlbum = album.copy(hasListened = !album.hasListened)) }
+        }
+    }
+
+    fun changeFavorite() {
+        _uiState.value.selectedAlbum?.let { album ->
+            _uiState.update { it.copy(selectedAlbum = album.copy(isFavorite = !album.isFavorite)) }
+        }
+    }
+
+    fun changeListenLater() {
+        _uiState.value.selectedAlbum?.let { album ->
+            _uiState.update { it.copy(selectedAlbum = album.copy(isListenLater = !album.isListenLater)) }
+        }
+    }
+
+    fun changeRating(rating: Int) {
+        _uiState.value.selectedAlbum?.let { album ->
+            if (album.rating == rating) _uiState.update { it.copy(selectedAlbum = album.copy(rating = 0)) }
+            else _uiState.update { it.copy(selectedAlbum = album.copy(rating = rating)) }
+
+        }
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedAlbum = null) }
+    }
+
+    fun deleteSelection() {
+        viewModelScope.launch {
+            uiState.value.selectedAlbum?.let { album ->
+                albumsRepository.deleteAlbum(album.toAlbumEntity())
             }
         }
     }
@@ -61,7 +94,7 @@ class ArtistDiscographyViewModel(
                     _uiState.update { it.copy(
                         allAlbums = albums.sortedBy { album -> album.releaseYear }.asReversed(),
                         artistName = it.artistName,
-                        selectedAlbums = albums.filter { album -> album.hasListened }) }
+                        listenedAlbums = albums.filter { album -> album.hasListened }) }
                 }
         }
     }

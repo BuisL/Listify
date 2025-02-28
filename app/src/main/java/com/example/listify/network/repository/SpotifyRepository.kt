@@ -1,11 +1,11 @@
 package com.example.listify.network.repository
 
 import android.util.Base64
+import android.util.Log
 import com.example.listify.network.api.SpotifyApiService
-import com.example.listify.network.converters.toAlbumUi
 import com.example.listify.network.converters.toArtistUi
 import com.example.listify.network.model.AlbumDto
-import com.example.listify.ui.model.AlbumUi
+import com.example.listify.network.model.ArtistListDto
 import com.example.listify.ui.model.ArtistUi
 
 
@@ -19,7 +19,7 @@ class NetworkSpotifyRepository(
 
     private var accessTokenData = AccessTokenData(null, 0, 0)
 
-    suspend fun getArtistDiscography(artistId: String): List<AlbumUi> {
+    suspend fun getArtistDiscography(artistId: String): List<AlbumDto> {
 
         val allAlbums = mutableListOf<AlbumDto>()
         var nextUrl: String? = null
@@ -47,7 +47,26 @@ class NetworkSpotifyRepository(
 
         } while (nextUrl != null)
 
-        return allAlbums.map { it.toAlbumUi() }
+        return allAlbums.map { it }
+    }
+
+    suspend fun getArtistsInfo(artistIds: List<String>): ArtistListDto {
+
+        refreshAccessToken()
+        var response = ArtistListDto()
+
+        val idsFormatted = artistIds.joinToString(",")
+        try {
+             response = spotifyApiService.getArtistsInfo(
+                idsFormatted,
+                "Bearer ${accessTokenData.accessToken}"
+            )
+        } catch (e: Exception) {
+            Log.d("Error2", "${e.message}")
+        }
+
+
+        return response
     }
 
     suspend fun searchArtist(artistName: String): List<ArtistUi> {
